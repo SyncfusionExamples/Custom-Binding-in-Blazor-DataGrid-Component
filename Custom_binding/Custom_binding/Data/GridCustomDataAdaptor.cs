@@ -31,11 +31,6 @@ namespace Custom_binding.Data
                 gridData = DataOperations.PerformFiltering(gridData, dataManagerRequest.Where, dataManagerRequest.Where[0].Operator);
             }
 
-            if (dataManagerRequest.Search != null && dataManagerRequest.Search.Count > 0)// Searching
-            {
-                gridData = DataOperations.PerformSearching(gridData, dataManagerRequest.Search);
-            }
-
             if (dataManagerRequest.Skip != 0)
             {
                 gridData = DataOperations.PerformSkip(gridData, dataManagerRequest.Skip); //Paging
@@ -68,8 +63,8 @@ namespace Custom_binding.Data
         /// </summary>
         /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
         /// <param name="value">The data item to be inserted.</param>
-        /// <param name="key">An optional key that can be used to identify the data item being inserted.</param>
-        /// <returns>The newly inserted data item.</returns>
+        /// <param name="key">The key value denotes the primary column value.</param>
+        /// <returns>returns newly inserted data item.</returns>
         public override object Insert(DataManager dataManager, object value, string key)
         {
             Orders?.Insert(0, value as Order);
@@ -81,9 +76,9 @@ namespace Custom_binding.Data
         /// </summary>
         /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
         /// <param name="value">The value to be removed item.</param>
-        /// <param name="keyField">The key field identifier of the item to be removed.</param>
-        /// <param name="key">The key value of the item to be removed.</param>
-        /// <returns>The removed data item.</returns>
+        /// <param name="keyField">The key field denotes the primary column name.</param>
+        /// <param name="key">The key value denotes the primary column value.</param>
+        /// <returns>returns the removed data item.</returns>
         public override object Remove(DataManager dataManager, object value, string keyField, string key)
         {
             int data = (int)value;
@@ -96,9 +91,9 @@ namespace Custom_binding.Data
         /// </summary>
         /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
         /// <param name="value">The value to be Updated item.</param>
-        /// <param name="keyField">The key field identifier of the item to be updated.</param>
-        /// <param name="key">The key value of the item to be updated.</param>
-        /// <returns>The updated data item.</returns>
+        /// <param name="keyField">The key field denotes the primary column name.</param>
+        /// <param name="key">The key value denotes the primary column value.</param>
+        /// <returns>returns the updated data item.</returns>
         public override object Update(DataManager dataManager, object value, string keyField, string key)
         {
             var val = value as Order;
