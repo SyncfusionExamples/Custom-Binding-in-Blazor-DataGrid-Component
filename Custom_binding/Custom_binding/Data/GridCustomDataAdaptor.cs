@@ -2,6 +2,7 @@
 using Syncfusion.Blazor;
 using static Custom_binding.Pages.Index;
 using System.Collections;
+using System.Linq;
 
 namespace Custom_binding.Data
 {
@@ -19,43 +20,50 @@ namespace Custom_binding.Data
         /// <returns>A collection of data, the type of which is determined by the implementation of this method.</returns>
         public override object? Read(DataManagerRequest dataManagerRequest, string? key = null)
         {
-            IEnumerable? gridData = Orders;
+            IEnumerable? dataSource = Orders;
+
+            //Performs filtering
+            if (dataManagerRequest.Where != null && dataManagerRequest.Where.Count > 0)
+            {
+                dataSource = DataOperations.PerformFiltering(dataSource, dataManagerRequest.Where, dataManagerRequest.Where[0].Operator);
+            }
+            int count = dataSource.Cast<Order>().Count();
+
+            //Performs sorting
+            if (dataManagerRequest.Sorted?.Count > 0)
+            {
+                dataSource = DataOperations.PerformSorting(dataSource, dataManagerRequest.Sorted);
+            }
             
-            if (dataManagerRequest.Sorted?.Count > 0) // perform Sorting
-            {
-                gridData = DataOperations.PerformSorting(gridData, dataManagerRequest.Sorted);
-            }
-
-            if (dataManagerRequest.Where != null && dataManagerRequest.Where.Count > 0)// Filtering
-            {
-                gridData = DataOperations.PerformFiltering(gridData, dataManagerRequest.Where, dataManagerRequest.Where[0].Operator);
-            }
-
-            if (dataManagerRequest.Skip != 0)
-            {
-                gridData = DataOperations.PerformSkip(gridData, dataManagerRequest.Skip); //Paging
-            }
-
-            if (dataManagerRequest.Take != 0)
-            {
-                gridData = DataOperations.PerformTake(gridData, dataManagerRequest.Take);
-            }
-
-            IDictionary<string, object> aggregates = new Dictionary<string, object>();
-            if (dataManagerRequest.Aggregates != null) // Aggregation
-            {
-                aggregates = DataUtil.PerformAggregation(gridData, dataManagerRequest.Aggregates);
-            }
-
+            //Performs grouping
             if (dataManagerRequest.Group != null && dataManagerRequest.Group.Any()) //Grouping
             {
                 foreach (var group in dataManagerRequest.Group)
                 {
-                    gridData = DataUtil.Group<Order>(gridData, group, dataManagerRequest.Aggregates, 0, dataManagerRequest.GroupByFormatter);
+                    dataSource = DataUtil.Group<Order>(dataSource, group, dataManagerRequest.Aggregates, 0, dataManagerRequest.GroupByFormatter);
                 }
             }
 
-            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = gridData, Count = Orders.Count, Aggregates = aggregates } : gridData;
+            //Performs aggregation
+            IDictionary<string, object> aggregates = null;
+            if (dataManagerRequest.Aggregates != null) // Aggregation
+            {
+                aggregates = DataUtil.PerformAggregation(dataSource, dataManagerRequest.Aggregates);
+            }
+            
+            //Performs paging. For example, Skip is 0 and Take is equal to Page size for 1st Page. 
+            if (dataManagerRequest.Skip != 0)
+            {
+                dataSource = DataOperations.PerformSkip(dataSource, dataManagerRequest.Skip);
+            }
+
+            if (dataManagerRequest.Take != 0)
+            {
+                dataSource = DataOperations.PerformTake(dataSource, dataManagerRequest.Take);
+            }
+
+            //Returning the DataResult or data collection based on the DataManagerRequest
+            return dataManagerRequest.RequiresCounts ? new DataResult() { Result = dataSource, Count = count, Aggregates = aggregates } : dataSource;
         }
 
         /// <summary>
@@ -65,10 +73,10 @@ namespace Custom_binding.Data
         /// <param name="value">The data item to be inserted.</param>
         /// <param name="key">The key value denotes the primary column value.</param>
         /// <returns>returns newly inserted data item.</returns>
-        public override object Insert(DataManager dataManager, object value, string key)
+        public override object Insert(DataManager dataManager, object record, string key)
         {
-            Orders?.Insert(0, value as Order);
-            return value;
+            Orders?.Insert(0, record as Order);
+            return record;
         }
 
         /// <summary>
@@ -76,14 +84,15 @@ namespace Custom_binding.Data
         /// </summary>
         /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
         /// <param name="value">The value to be removed item.</param>
-        /// <param name="keyField">The key field denotes the primary column name.</param>
+        /// <param name="primaryColumnName">The key field denotes the primary column name.</param>
         /// <param name="key">The key value denotes the primary column value.</param>
         /// <returns>returns the removed data item.</returns>
-        public override object Remove(DataManager dataManager, object value, string keyField, string key)
+        public override object Remove(DataManager dataManager, object primaryColumnValue, string primaryColumnName, string key)
         {
-            int data = (int)value;
-            Orders?.Remove(Orders.Where((Order) => Order.OrderID == data).FirstOrDefault());
-            return value;
+            //Since, OrderID column is marked as primary column in DataGrid, we can directly use the primaryColumnValue as OrderID.
+            int data = (int)primaryColumnValue;
+            Orders.Remove(Orders.Where((Order) => Order.OrderID == data).FirstOrDefault());
+            return data;
         }
 
         /// <summary>
@@ -91,21 +100,24 @@ namespace Custom_binding.Data
         /// </summary>
         /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
         /// <param name="value">The value to be Updated item.</param>
-        /// <param name="keyField">The key field denotes the primary column name.</param>
+        /// <param name="primaryColumnName">The key field denotes the primary column name.</param>
         /// <param name="key">The key value denotes the primary column value.</param>
         /// <returns>returns the updated data item.</returns>
-        public override object Update(DataManager dataManager, object value, string keyField, string key)
+        public override object Update(DataManager dataManager, object record, string primaryColumnName, string key)
         {
-            var val = value as Order;
-            var data = Orders.Where((Order) => Order.OrderID == val?.OrderID).FirstOrDefault();
-            if (data != null)
+            var order= record as Order;
+
+            //Here, used OrderID directly, since OrderID column is marked as primary column in DataGrid.
+            //Otherwise, you can use the primaryColumnName to get the primary column value. For eg: ReflectionExtension.GetValue(record, keyField)
+            var dataObject = Orders.Where(x => x.OrderID == order.OrderID).FirstOrDefault();
+
+            if (dataObject != null)
             {
-                data.CustomerID = val?.CustomerID;
-                data.Freight = val?.Freight;
-                data.OrderDate = val?.OrderDate;
+                dataObject.OrderID = order.OrderID;
+                dataObject.CustomerID = order.CustomerID;
+                dataObject.Freight = order.Freight;
             }
-            return value;
+            return dataObject;
         }
-      
     }
 }
