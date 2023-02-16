@@ -1,34 +1,44 @@
 ﻿using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor;
-using static Custom_binding.Pages.Index;
 using System.Collections;
-
 namespace Custom_binding.Data
 {
     /// <summary>
-    /// A class the extends <see cref=“DataAdaptor”/> to customize data retrieval and data operations for Blazor DataGrid. 
-    /// DataGrid supports custom data binding that allows you to customize the data retrieval and data operations manually.
+    /// A class the extends <see cref=“DataAdaptor”/> 
+    /// Custom data binding in a data grid gives developers the ability to customize the way data is retrieved and processed.
     /// </summary>
     public class GridCustomDataAdaptor : DataAdaptor
     {
+        public List<Order>? Orders { get; set; }
+        public GridCustomDataAdaptor()
+        {
+            Orders = Enumerable.Range(1,200).Select(x => new Order()
+            {
+                OrderID = 1000 + x,
+                CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
+                Freight = 1.5 * x,
+                OrderDate = DateTime.Now.AddDays(x),
+            }).ToList();
+        }
+
         /// <summary>
         /// Returns the data collection after performing data operations based on request from <see cref=”DataManagerRequest”/>
         /// </summary>
         /// <param name="dataManagerRequest">DataManagerRequest is used on the server side to model-bind posted data.</param>
-        /// <param name="key">An optional parameter that can be used to perform additional data operations.</param>
+        /// <param name="key">An optional parameter that allows to perform additional data operations.</param>
         /// <returns>A collection of data, the type of which is determined by the implementation of this method.</returns>
         public override object? Read(DataManagerRequest dataManagerRequest, string? key = null)
         {
             IEnumerable? gridData = Orders;
-            
-            if (dataManagerRequest.Sorted?.Count > 0) // perform Sorting
-            {
-                gridData = DataOperations.PerformSorting(gridData, dataManagerRequest.Sorted);
-            }
 
             if (dataManagerRequest.Where != null && dataManagerRequest.Where.Count > 0)// Filtering
             {
                 gridData = DataOperations.PerformFiltering(gridData, dataManagerRequest.Where, dataManagerRequest.Where[0].Operator);
+            }
+
+            if (dataManagerRequest.Sorted?.Count > 0) // perform Sorting
+            {
+                gridData = DataOperations.PerformSorting(gridData, dataManagerRequest.Sorted);
             }
 
             if (dataManagerRequest.Skip != 0)
@@ -59,12 +69,11 @@ namespace Custom_binding.Data
         }
 
         /// <summary>
-        /// Inserts a new data item into the data collection.
+        /// Inserts a new data item into the collection of data items. If the item already exists, updates the existing item with the new values. Returns the inserted or updated data item.
         /// </summary>
-        /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
-        /// <param name="value">The data item to be inserted.</param>
-        /// <param name="key">The key value denotes the primary column value.</param>
-        /// <returns>returns newly inserted data item.</returns>
+        /// <param name="dataManager">An instance of the DataManager class responsible for managing the data store in the grid data</param>
+        /// <param name="value">Represents the newly added data in a crud operation.</param>
+        /// <returns>Returns the data that was inserted as part of the operation.</returns>
         public override object Insert(DataManager dataManager, object value, string key)
         {
             Orders?.Insert(0, value as Order);
@@ -72,13 +81,12 @@ namespace Custom_binding.Data
         }
 
         /// <summary>
-        /// Removes a data item from the data collection.
+        /// Removes a data item from the collection of data items.
         /// </summary>
-        /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
-        /// <param name="value">The value to be removed item.</param>
-        /// <param name="keyField">The key field denotes the primary column name.</param>
-        /// <param name="key">The key value denotes the primary column value.</param>
-        /// <returns>returns the removed data item.</returns>
+        /// <param name="dataManager">An instance of the DataManager class responsible for managing the data store in the grid data</param>
+        /// <param name="value">Represents the removed item in a crud methods.</param>
+        /// <param name="keyField">The key field denotes the primary column name in the grid data.</param>
+        /// <returns>Returns the data item that was removed from the collection.</returns>
         public override object Remove(DataManager dataManager, object value, string keyField, string key)
         {
             int data = (int)value;
@@ -87,25 +95,23 @@ namespace Custom_binding.Data
         }
 
         /// <summary>
-        /// Updates an existing data item in the data collection.
+        /// Updates a data item from the collection of data items.
         /// </summary>
-        /// <param name="dataManager">The DataManager is a data management component used for performing data operations in applications</param>
-        /// <param name="value">The value to be Updated item.</param>
-        /// <param name="keyField">The key field denotes the primary column name.</param>
-        /// <param name="key">The key value denotes the primary column value.</param>
-        /// <returns>returns the updated data item.</returns>
+        /// <param name="dataManager">An instance of the DataManager class responsible for managing the data store in the grid data</param>
+        /// <param name="value">Represents the Updated item in a crud methods.</param>
+        /// <param name="keyField">The key field denotes the primary column name in the grid data.</param>
+        /// <returns>Returns the data item that was Updated from the collection.</returns>
         public override object Update(DataManager dataManager, object value, string keyField, string key)
         {
-            var val = value as Order;
-            var data = Orders.Where((Order) => Order.OrderID == val?.OrderID).FirstOrDefault();
+            var primary_key = value.GetType().GetProperty(keyField).GetValue(value);
+            var data = Orders.Where(x => x.OrderID == (int)primary_key).FirstOrDefault();
             if (data != null)
             {
-                data.CustomerID = val?.CustomerID;
-                data.Freight = val?.Freight;
-                data.OrderDate = val?.OrderDate;
+                data.CustomerID = (value as Order)?.CustomerID;
+                data.Freight = (value as Order)?.Freight;
+                data.OrderDate = (value as Order)?.OrderDate;
             }
             return value;
         }
-      
     }
 }
