@@ -16,7 +16,7 @@ namespace Custom_binding.Data
 
         public GridCustomDataAdaptor()
         {
-            Orders = Enumerable.Range(1, 75).Select(x => new Order()
+            Orders = Enumerable.Range(1, 200).Select(x => new Order()
             {
                 OrderID = 1000 + x,
                 CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
