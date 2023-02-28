@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid_Custom_Binding", "Grid_Custom_Binding\Grid_Custom_Binding.csproj", "{B02AD2E8-C94F-4BA9-BCD2-3CEFE6F4E96A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B02AD2E8-C94F-4BA9-BCD2-3CEFE6F4E96A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B02AD2E8-C94F-4BA9-BCD2-3CEFE6F4E96A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B02AD2E8-C94F-4BA9-BCD2-3CEFE6F4E96A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B02AD2E8-C94F-4BA9-BCD2-3CEFE6F4E96A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DEAB7E46-C15F-4EC1-8B15-FC3C345FC9B6}
+	EndGlobalSection
+EndGlobal
