@@ -5,6 +5,7 @@
 <SfGrid TValue="Order" ID="Grid" AllowGrouping="true" AllowSorting="true" AllowFiltering="true" AllowPaging="true" 
     Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })">
     <SfDataManager AdaptorInstance="@typeof(GridCustomDataAdaptor)" Adaptor="Adaptors.CustomAdaptor"/>
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
     <GridPageSettings PageSize="8"/>
     <GridEditSettings AllowEditing="true" AllowDeleting="true" AllowAdding="true" AllowEditOnDblClick="true" Mode="@EditMode.Normal"/>
     <GridAggregates>
@@ -19,20 +20,14 @@
                             </div>
                         }
                     </FooterTemplate>
-                </GridAggregateColumn>
-            </GridAggregateColumns>
-        </GridAggregate>
-        <GridAggregate>
-            <GridAggregateColumns>
-                <GridAggregateColumn Field=@nameof(Order.Freight) Type="AggregateType.Average" Format="C2">
-                    <FooterTemplate>
+                    <GroupFooterTemplate>
                         @{
                             var aggregate = (context as AggregateTemplateContext);
                             <div>
-                                <p>Average: @aggregate?.Average</p>
+                                <p>Sum: @aggregate?.Sum</p>
                             </div>
                         }
-                    </FooterTemplate>
+                    </GroupFooterTemplate>
                 </GridAggregateColumn>
             </GridAggregateColumns>
         </GridAggregate>
@@ -44,4 +39,3 @@
         <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Width="150" TextAlign="@TextAlign.Center"/>
     </GridColumns>
 </SfGrid>
-
