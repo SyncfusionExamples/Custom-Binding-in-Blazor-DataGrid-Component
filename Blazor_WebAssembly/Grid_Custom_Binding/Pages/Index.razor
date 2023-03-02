@@ -18,6 +18,14 @@
                             </div>
                         }
                     </FooterTemplate>
+                    <GroupFooterTemplate>
+                        @{
+                            var aggregate = (context as AggregateTemplateContext);
+                            <div>
+                                <p>Sum: @aggregate?.Sum</p>
+                            </div>
+                        }
+                    </GroupFooterTemplate>
                 </GridAggregateColumn>
             </GridAggregateColumns>
         </GridAggregate>
