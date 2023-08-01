@@ -1,4 +1,4 @@
-# Custom-Binding in Blazor DataGrid Component
+# Custom Binding in Blazor DataGrid Component
 A quick-start project that helps you how to custom binding in blazor data grid component. As well as some important features such as paging, sorting, filtering, aggregates, grouping and editing using custom binding.
 
 Documentation: https://blazor.syncfusion.com/documentation/datagrid/custom-binding
